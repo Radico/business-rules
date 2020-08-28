@@ -11,11 +11,11 @@ from .util.compat import getfullargspec
 logger = logging.getLogger(__name__)
 
 
-def run_all(rule_list, defined_variables, defined_actions, stop_on_first_trigger=False):
+def run_all(rule_list, defined_variables, defined_actions, stop_on_first_trigger=False, disable_checks=False):
     # type: (...) -> List[bool]
     results = [False] * len(rule_list)
     for i, rule in enumerate(rule_list):
-        result = run(rule, defined_variables, defined_actions)
+        result = run(rule, defined_variables, defined_actions, disable_checks)
         if result:
             results[i] = True
             if stop_on_first_trigger:
@@ -23,24 +23,24 @@ def run_all(rule_list, defined_variables, defined_actions, stop_on_first_trigger
     return results
 
 
-def run(rule, defined_variables, defined_actions):
+def run(rule, defined_variables, defined_actions, disable_checks=False):
     conditions, actions = rule.get('conditions'), rule['actions']
 
     if conditions is not None:
-        rule_triggered, checked_conditions_results = check_conditions_recursively(conditions, defined_variables, rule)
+        rule_triggered, checked_conditions_results = check_conditions_recursively(conditions, defined_variables, rule, disable_checks)
     else:
         # If there are no conditions then trigger actions
         rule_triggered = True
         checked_conditions_results = []
 
     if rule_triggered:
-        do_actions(actions, defined_actions, checked_conditions_results, rule)
+        do_actions(actions, defined_actions, checked_conditions_results, rule, disable_checks)
         return True
 
     return False
 
 
-def check_conditions_recursively(conditions, defined_variables, rule):
+def check_conditions_recursively(conditions, defined_variables, rule, disable_checks=False):
     """
     Check if the conditions are true given a set of variables.
     This method checks all conditions including embedded ones.
@@ -59,7 +59,7 @@ def check_conditions_recursively(conditions, defined_variables, rule):
         assert len(conditions['all']) >= 1
         matches = []
         for condition in conditions['all']:
-            check_condition_result, matches_results = check_conditions_recursively(condition, defined_variables, rule)
+            check_condition_result, matches_results = check_conditions_recursively(condition, defined_variables, rule, disable_checks)
             matches.extend(matches_results)
             if not check_condition_result:
                 return False, []
@@ -68,7 +68,7 @@ def check_conditions_recursively(conditions, defined_variables, rule):
     elif keys == ['any']:
         assert len(conditions['any']) >= 1
         for condition in conditions['any']:
-            check_condition_result, matches_results = check_conditions_recursively(condition, defined_variables, rule)
+            check_condition_result, matches_results = check_conditions_recursively(condition, defined_variables, rule, disable_checks)
             if check_condition_result:
                 return True, matches_results
         return False, []
@@ -77,11 +77,11 @@ def check_conditions_recursively(conditions, defined_variables, rule):
         # help prevent errors - any and all can only be in the condition dict
         # if they're the only item
         assert not ('any' in keys or 'all' in keys)
-        result = check_condition(conditions, defined_variables, rule)
+        result = check_condition(conditions, defined_variables, rule, disable_checks)
         return result[0], [result]
 
 
-def check_condition(condition, defined_variables, rule):
+def check_condition(condition, defined_variables, rule, disable_checks=False):
     """
     Checks a single rule condition - the condition will be made up of
     variables, values, and the comparison operator. The defined_variables
@@ -103,12 +103,12 @@ def check_condition(condition, defined_variables, rule):
     """
     name, op, value = condition['name'], condition['operator'], condition['value']
     params = condition.get('params', {})
-    operator_type = _get_variable_value(defined_variables, name, params, rule)
-    return ConditionResult(result=_do_operator_comparison(operator_type, op, value), name=name, operator=op,
+    operator_type = _get_variable_value(defined_variables, name, params, rule, disable_checks)
+    return ConditionResult(result=_do_operator_comparison(operator_type, op, value, disable_checks), name=name, operator=op,
                            value=value, parameters=params)
 
 
-def _get_variable_value(defined_variables, name, params, rule):
+def _get_variable_value(defined_variables, name, params, rule, disable_checks=False):
     """
     Call the function provided on the defined_variables object with the
     given name (raise exception if that doesn't exist) and casts it to the
@@ -127,14 +127,14 @@ def _get_variable_value(defined_variables, name, params, rule):
         raise AssertionError("Variable {0} is not defined in class {1}".format(
             name, defined_variables.__class__.__name__))
 
-    utils.check_params_valid_for_method(method, params, method_type.METHOD_TYPE_VARIABLE)
+    utils.check_params_valid_for_method(method, params, method_type.METHOD_TYPE_VARIABLE, disable_checks)
 
     method_params = _build_variable_parameters(method, params, rule)
     variable_value = method(**method_params)
     return method.field_type(variable_value)
 
 
-def _do_operator_comparison(operator_type, operator_name, comparison_value):
+def _do_operator_comparison(operator_type, operator_name, comparison_value, disable_checks=False):
     """
     Finds the method on the given operator_type and compares it to the
     given comparison_value.
@@ -148,17 +148,18 @@ def _do_operator_comparison(operator_type, operator_name, comparison_value):
     :return:
     """
 
-    def fallback(*args, **kwargs):
+    method = getattr(operator_type, operator_name, None)
+
+    if method is None:
         raise AssertionError("Operator {0} does not exist for type {1}".format(
             operator_name, operator_type.__class__.__name__))
 
-    method = getattr(operator_type, operator_name, fallback)
     if getattr(method, 'input_type', '') == FIELD_NO_INPUT:
         return method()
     return method(comparison_value)
 
 
-def do_actions(actions, defined_actions, checked_conditions_results, rule):
+def do_actions(actions, defined_actions, checked_conditions_results, rule, disable_checks=False):
     """
 
     :param actions:             List of actions objects to be executed (defined in library)
@@ -193,7 +194,8 @@ def do_actions(actions, defined_actions, checked_conditions_results, rule):
                 "Action {0} is not defined in class {1}".format(method_name, defined_actions.__class__.__name__))
 
         missing_params_with_default_value = utils.check_params_valid_for_method(method, action_params,
-                                                                                method_type.METHOD_TYPE_ACTION)
+                                                                                method_type.METHOD_TYPE_ACTION,
+                                                                                disable_checks=disable_checks)
 
         if missing_params_with_default_value:
             action_params = _set_default_values_for_missing_action_params(method,

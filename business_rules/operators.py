@@ -11,7 +11,7 @@ from six import integer_types, string_types
 from .fields import (FIELD_DATETIME, FIELD_NO_INPUT, FIELD_NUMERIC,
                      FIELD_SELECT, FIELD_SELECT_MULTIPLE, FIELD_TEXT,
                      FIELD_TIME)
-from .utils import float_to_decimal, fn_name_to_pretty_label
+from .utils import fn_name_to_pretty_label
 
 
 class BaseType(object):
@@ -37,7 +37,7 @@ def export_type(cls):
 
 
 def type_operator(input_type, label=None,
-                  assert_type_for_arguments=True):
+                  assert_type_for_arguments=False):
     """ Decorator to make a function into a type operator.
 
     - assert_type_for_arguments - if True this patches the operator function
@@ -106,7 +106,7 @@ class StringType(BaseType):
 
 @export_type
 class NumericType(BaseType):
-    EPSILON = Decimal('0.000001')
+    EPSILON = 0.000001
 
     name = "numeric"
 
@@ -114,32 +114,32 @@ class NumericType(BaseType):
     def _assert_valid_value_and_cast(value):
         if isinstance(value, float):
             # In python 2.6, casting float to Decimal doesn't work
-            return float_to_decimal(value)
-        if isinstance(value, integer_types):
-            return Decimal(value)
-        if isinstance(value, Decimal):
             return value
+        if isinstance(value, integer_types):
+            return value
+        if isinstance(value, Decimal):
+            return float(value)
         else:
             raise AssertionError("{0} is not a valid numeric type.".
                                  format(value))
 
-    @type_operator(FIELD_NUMERIC)
+    @type_operator(FIELD_NUMERIC, assert_type_for_arguments=True)
     def equal_to(self, other_numeric):
         return abs(self.value - other_numeric) <= self.EPSILON
 
-    @type_operator(FIELD_NUMERIC)
+    @type_operator(FIELD_NUMERIC, assert_type_for_arguments=True)
     def greater_than(self, other_numeric):
         return (self.value - other_numeric) > self.EPSILON
 
-    @type_operator(FIELD_NUMERIC)
+    @type_operator(FIELD_NUMERIC, assert_type_for_arguments=True)
     def greater_than_or_equal_to(self, other_numeric):
         return self.greater_than(other_numeric) or self.equal_to(other_numeric)
 
-    @type_operator(FIELD_NUMERIC)
+    @type_operator(FIELD_NUMERIC, assert_type_for_arguments=True)
     def less_than(self, other_numeric):
         return (other_numeric - self.value) > self.EPSILON
 
-    @type_operator(FIELD_NUMERIC)
+    @type_operator(FIELD_NUMERIC, assert_type_for_arguments=True)
     def less_than_or_equal_to(self, other_numeric):
         return self.less_than(other_numeric) or self.equal_to(other_numeric)
 
@@ -282,32 +282,32 @@ class DateTimeType(BaseType):
 
         return condition_value_datetime.replace(tzinfo=variable_datetime.tzinfo)
 
-    @type_operator(FIELD_DATETIME)
+    @type_operator(FIELD_DATETIME, assert_type_for_arguments=True)
     def equal_to(self, other_datetime):
         # type: (datetime) -> bool
         other_datetime = self._set_timezone_if_different(self.value, other_datetime)
 
         return self.value == other_datetime
 
-    @type_operator(FIELD_DATETIME)
+    @type_operator(FIELD_DATETIME, assert_type_for_arguments=True)
     def after_than(self, other_datetime):
         # type: (datetime) -> bool
         other_datetime = self._set_timezone_if_different(self.value, other_datetime)
 
         return self.value > other_datetime
 
-    @type_operator(FIELD_DATETIME)
+    @type_operator(FIELD_DATETIME, assert_type_for_arguments=True)
     def after_than_or_equal_to(self, other_datetime):
         return self.after_than(other_datetime) or self.equal_to(other_datetime)
 
-    @type_operator(FIELD_DATETIME)
+    @type_operator(FIELD_DATETIME, assert_type_for_arguments=True)
     def before_than(self, other_datetime):
         # type: (datetime) -> bool
         other_datetime = self._set_timezone_if_different(self.value, other_datetime)
 
         return self.value < other_datetime
 
-    @type_operator(FIELD_DATETIME)
+    @type_operator(FIELD_DATETIME, assert_type_for_arguments=True)
     def before_than_or_equal_to(self, other_datetime):
         return self.before_than(other_datetime) or self.equal_to(other_datetime)
 
@@ -343,22 +343,22 @@ class TimeType(BaseType):
         except (ValueError, TypeError):
             raise AssertionError("{0} is not a valid time type.".format(value))
 
-    @type_operator(FIELD_TIME)
+    @type_operator(FIELD_TIME, assert_type_for_arguments=True)
     def equal_to(self, other_time):
         return self.value == other_time
 
-    @type_operator(FIELD_TIME)
+    @type_operator(FIELD_TIME, assert_type_for_arguments=True)
     def after_than(self, other_time):
         return self.value > other_time
 
-    @type_operator(FIELD_TIME)
+    @type_operator(FIELD_TIME, assert_type_for_arguments=True)
     def after_than_or_equal_to(self, other_time):
         return self.after_than(other_time) or self.equal_to(other_time)
 
-    @type_operator(FIELD_TIME)
+    @type_operator(FIELD_TIME, assert_type_for_arguments=True)
     def before_than(self, other_time):
         return self.value < other_time
 
-    @type_operator(FIELD_TIME)
+    @type_operator(FIELD_TIME, assert_type_for_arguments=True)
     def before_than_or_equal_to(self, other_time):
         return self.before_than(other_time) or self.equal_to(other_time)

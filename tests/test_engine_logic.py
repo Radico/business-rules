@@ -55,7 +55,7 @@ class EngineTests(TestCase):
 
         self.assertEqual(results, [True, False])
         self.assertEqual(engine.run.call_count, 1)
-        engine.run.assert_called_once_with(rule1, variables, actions)
+        engine.run.assert_called_once_with(rule1, variables, actions, False)
 
     @patch.object(engine, 'check_conditions_recursively', return_value=(True, []))
     @patch.object(engine, 'do_actions')
@@ -68,8 +68,8 @@ class EngineTests(TestCase):
         result = engine.run(rule, variables, actions)
 
         self.assertEqual(result, True)
-        engine.check_conditions_recursively.assert_called_once_with(rule['conditions'], variables, rule)
-        engine.do_actions.assert_called_once_with(rule['actions'], actions, [], rule)
+        engine.check_conditions_recursively.assert_called_once_with(rule['conditions'], variables, rule, False)
+        engine.do_actions.assert_called_once_with(rule['actions'], actions, [], rule, False)
 
     @patch.object(engine, 'check_conditions_recursively', return_value=(False, []))
     @patch.object(engine, 'do_actions')
@@ -82,7 +82,7 @@ class EngineTests(TestCase):
         result = engine.run(rule, variables, actions)
 
         self.assertEqual(result, False)
-        engine.check_conditions_recursively.assert_called_once_with(rule['conditions'], variables, rule)
+        engine.check_conditions_recursively.assert_called_once_with(rule['conditions'], variables, rule, False)
         self.assertEqual(engine.do_actions.call_count, 0)
 
     @patch.object(engine, 'check_condition', return_value=(True,))
@@ -95,7 +95,7 @@ class EngineTests(TestCase):
         self.assertEqual(result, (True, [(True,), (True,)]))
         # assert call count and most recent call are as expected
         self.assertEqual(engine.check_condition.call_count, 2)
-        engine.check_condition.assert_called_with({'thing2': ''}, variables, rule)
+        engine.check_condition.assert_called_with({'thing2': ''}, variables, rule, False)
 
     # ########################################################## #
     # #################### Check conditions #################### #
@@ -108,7 +108,7 @@ class EngineTests(TestCase):
 
         result = engine.check_conditions_recursively(conditions, variables, rule)
         self.assertEqual(result, (False, []))
-        engine.check_condition.assert_called_once_with({'thing1': ''}, variables, rule)
+        engine.check_condition.assert_called_once_with({'thing1': ''}, variables, rule, False)
 
     def test_check_all_condition_with_no_items_fails(self):
         conditions = {'all': []}
@@ -125,7 +125,7 @@ class EngineTests(TestCase):
 
         result = engine.check_conditions_recursively(conditions, variables, rule)
         self.assertEqual(result, (True, [(True,)]))
-        engine.check_condition.assert_called_once_with({'thing1': ''}, variables, rule)
+        engine.check_condition.assert_called_once_with({'thing1': ''}, variables, rule, False)
 
     @patch.object(engine, 'check_condition', return_value=(False,))
     def test_check_any_conditions_with_all_false(self, *args):
@@ -137,7 +137,7 @@ class EngineTests(TestCase):
         self.assertEqual(result, (False, []))
         # assert call count and most recent call are as expected
         self.assertEqual(engine.check_condition.call_count, 2)
-        engine.check_condition.assert_called_with(conditions['any'][1], variables, rule)
+        engine.check_condition.assert_called_with(conditions['any'][1], variables, rule, False)
 
     def test_check_any_condition_with_no_items_fails(self):
         conditions = {'any': []}
@@ -168,17 +168,17 @@ class EngineTests(TestCase):
 
         bv = BaseVariables()
 
-        def side_effect(condition, _, rule):
+        def side_effect(condition, _, rule, disable_checks=False):
             return ConditionResult(result=condition['name'] in [2, 3], name=condition['name'], operator='', value='',
                                    parameters='')
 
         engine.check_condition.side_effect = side_effect
 
-        engine.check_conditions_recursively(conditions, bv, rule)
+        engine.check_conditions_recursively(conditions, bv, rule, False)
         self.assertEqual(engine.check_condition.call_count, 3)
-        engine.check_condition.assert_any_call({'name': 1}, bv, rule)
-        engine.check_condition.assert_any_call({'name': 2}, bv, rule)
-        engine.check_condition.assert_any_call({'name': 3}, bv, rule)
+        engine.check_condition.assert_any_call({'name': 1}, bv, rule, False)
+        engine.check_condition.assert_any_call({'name': 2}, bv, rule, False)
+        engine.check_condition.assert_any_call({'name': 3}, bv, rule, False)
 
     # ##################################### #
     # ####### Operator comparisons ######## #

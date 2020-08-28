@@ -86,10 +86,10 @@ class NumericOperatorTests(TestCase):
         ten_var_int = NumericType(ten_int)
         ten_var_float = NumericType(ten_float)
         ten_var_long = NumericType(ten_long)
-        self.assertTrue(isinstance(ten_var_dec.value, Decimal))
-        self.assertTrue(isinstance(ten_var_int.value, Decimal))
-        self.assertTrue(isinstance(ten_var_float.value, Decimal))
-        self.assertTrue(isinstance(ten_var_long.value, Decimal))
+        self.assertTrue(isinstance(ten_var_dec.value, float))
+        self.assertTrue(isinstance(ten_var_int.value, int))
+        self.assertTrue(isinstance(ten_var_float.value, float))
+        self.assertTrue(isinstance(ten_var_long.value, int))
 
     def test_numeric_equal_to(self):
         self.assertTrue(NumericType(10).equal_to(10))

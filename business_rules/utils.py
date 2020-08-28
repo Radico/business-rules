@@ -94,7 +94,7 @@ def params_dict_to_list(params):
     ]
 
 
-def check_params_valid_for_method(method, given_params, method_type_name):
+def check_params_valid_for_method(method, given_params, method_type_name, disable_checks=False):
     """
     Verifies that the given parameters (defined in the Rule) match the names of those defined in
     the variable or action decorator. Raise an error if one of the sets contains a parameter that
@@ -118,15 +118,16 @@ def check_params_valid_for_method(method, given_params, method_type_name):
         params_with_default_value = check_for_default_value_for_missing_params(missing_params, method_params)
         missing_params -= params_with_default_value
 
-    if missing_params:
-        raise AssertionError("Missing parameters {0} for {1} {2}".format(
-            ', '.join(missing_params), method_type_name, method.__name__))
+    if not disable_checks:
+        if missing_params:
+            raise AssertionError("Missing parameters {0} for {1} {2}".format(
+                ', '.join(missing_params), method_type_name, method.__name__))
 
-    invalid_params = set(given_params).difference(defined_params)
+        invalid_params = set(given_params).difference(defined_params)
 
-    if invalid_params:
-        raise AssertionError("Invalid parameters {0} for {1} {2}".format(
-            ', '.join(invalid_params), method_type_name, method.__name__))
+        if invalid_params:
+            raise AssertionError("Invalid parameters {0} for {1} {2}".format(
+                ', '.join(invalid_params), method_type_name, method.__name__))
 
     return params_with_default_value
 

@@ -41,7 +41,7 @@ class OperatorsClassTests(TestCase):
 
             _assert_valid_value_and_cast = MagicMock()
 
-            @type_operator('text')
+            @type_operator('text', assert_type_for_arguments=True)
             def some_operator(self, other_param):
                 pass
 
