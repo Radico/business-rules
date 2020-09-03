@@ -149,7 +149,7 @@ def check_for_default_value_for_missing_params(missing_params, method_params):
     missing_params_with_default_value = set()
     if method_params:
         for param in method_params:
-            if param['name'] in missing_params and param.get('default_value', None) is not None:
+            if param['name'] in missing_params and 'default_value' in param:
                 missing_params_with_default_value.add(param['name'])
 
     return missing_params_with_default_value
