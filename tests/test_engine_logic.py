@@ -264,14 +264,14 @@ class EngineTests(TestCase):
             defined_actions.action2.params = [{
                 'label': 'action2',
                 'name': 'param1',
-                'fieldType': fields.FIELD_TEXT,
-                'defaultValue': None
+                'field_type': fields.FIELD_TEXT,
+                'default_value': None
             },
                 {
                     'label': 'action2',
                     'name': 'param2',
-                    'fieldType': fields.FIELD_NUMERIC,
-                    'defaultValue': None
+                    'field_type': fields.FIELD_NUMERIC,
+                    'default_value': None
                 }
             ]
             payload = [(True, 'condition_name', 'operator_name', 'condition_value')]

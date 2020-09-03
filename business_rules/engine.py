@@ -219,7 +219,7 @@ def _set_default_values_for_missing_action_params(method, missing_parameters_wit
         for param in method.params:
             param_name = param['name']
             if param_name in missing_parameters_with_default_value:
-                default_value = param.get('defaultValue', None)
+                default_value = param.get('default_value', None)
                 if default_value is not None:
                     modified_action_params[param_name] = default_value
                     continue

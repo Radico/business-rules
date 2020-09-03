@@ -47,7 +47,7 @@ class SomeActions(BaseActions):
 
     @rule_action(params=[
         {
-            'fieldType': FIELD_SELECT,
+            'field_type': FIELD_SELECT,
             'name': 'baz',
             'label': 'Baz',
             'options': [

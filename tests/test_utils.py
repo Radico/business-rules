@@ -63,10 +63,10 @@ def test_export_rule_data():
             "label": "Some Action",
             "params": [
                 {
-                    'fieldType': 'numeric',
+                    'field_type': 'numeric',
                     'label': 'Foo',
                     'name': 'foo',
-                    'defaultValue': None
+                    'default_value': None
                 }
             ]
         },
@@ -75,10 +75,10 @@ def test_export_rule_data():
             "label": "woohoo",
             "params": [
                 {
-                    'fieldType': 'text',
+                    'field_type': 'text',
                     'label': 'Bar',
                     'name': 'bar',
-                    'defaultValue': None
+                    'default_value': None
                 }
             ]
         },
@@ -87,7 +87,7 @@ def test_export_rule_data():
             "label": "Some Select Action",
             "params": [
                 {
-                    'fieldType': fields.FIELD_SELECT,
+                    'field_type': fields.FIELD_SELECT,
                     'name': 'baz',
                     'label': 'Baz',
                     'options': [

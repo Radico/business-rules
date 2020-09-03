@@ -28,8 +28,8 @@ def _validate_action_parameters(func, params):
                 {
                  'label': 'action_label',
                  'name': 'action_parameter',
-                 'fieldType': 'numeric',
-                 'defaultValue': 123
+                 'field_type': 'numeric',
+                 'default_value': 123
                 }
     :return:
     """
@@ -38,7 +38,7 @@ def _validate_action_parameters(func, params):
         valid_fields = get_valid_fields()
 
         for param in params:
-            param_name, field_type = param['name'], param['fieldType']
+            param_name, field_type = param['name'], param['field_type']
             if param_name not in func.__code__.co_varnames:
                 raise AssertionError("Unknown parameter name {0} specified for action {1}".format(
                     param_name, func.__name__))
@@ -75,8 +75,8 @@ def rule_action(label=None, params=None):
                 dict(
                     label=fn_name_to_pretty_label(key),
                     name=key,
-                    fieldType=getattr(value, "field_type", value),
-                    defaultValue=getattr(value, "default_value", None)
+                    field_type=getattr(value, "field_type", value),
+                    default_value=getattr(value, "default_value", None)
                 ) for key, value in params.items()
             ]
 
