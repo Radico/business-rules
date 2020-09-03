@@ -95,7 +95,7 @@ class ProductActions(BaseActions):
     def __init__(self, product):
         self.product = product
 
-    @rule_action(params=[{'fieldType': FIELD_SELECT,
+    @rule_action(params=[{'field_type': FIELD_SELECT,
                           'name': 'stock_state',
                           'label': 'Stock state',
                           'options': [
