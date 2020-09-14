@@ -1,6 +1,12 @@
 History
 -------
 
+1.6.1
++++++
+released 2020-09-14
+
+- Removed check for method type when validating parameters
+
 1.6.0
 +++++
 released 2020-09-03
