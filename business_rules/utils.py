@@ -114,7 +114,7 @@ def check_params_valid_for_method(method, given_params, method_type_name, disabl
 
     # check for default value in action parameters, if it is present, exclude param from missing params
     params_with_default_value = set()
-    if method_type_name == method_type.METHOD_TYPE_ACTION and missing_params:
+    if missing_params:
         params_with_default_value = check_for_default_value_for_missing_params(missing_params, method_params)
         missing_params -= params_with_default_value
 
