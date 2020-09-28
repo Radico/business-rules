@@ -1,6 +1,12 @@
 History
 -------
 
+1.6.2
++++++
+released 2020-09-28
+
+- Renamed project to business-rules-simon to fix naming conflicts
+
 1.6.1
 +++++
 released 2020-09-14

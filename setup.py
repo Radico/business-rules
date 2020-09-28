@@ -18,12 +18,12 @@ install_requires = [
 ]
 
 setuptools.setup(
-    name='business-rules',
+    name='business-rules-simon',
     version=version,
     description='{0}\n\n{1}'.format(description, history),
     author='Venmo',
-    author_email='open-source@venmo.com',
-    url='https://github.com/venmo/business-rules',
+    author_email='wyn@simondata.com',
+    url='https://github.com/Radico/business-rules',
     packages=find_packages(exclude=['tests']),
     license='MIT',
     install_requires=install_requires

@@ -1,7 +1,5 @@
-business-rules
+business-rules-simon
 ==============
-
-[![Build Status](https://travis-ci.org/venmo/business-rules.svg?branch=master)](https://travis-ci.org/venmo/business-rules)
 
 As a software system grows in complexity and usage, it can become burdensome if
 every change to the logic/behavior of the system also requires you to write and
@@ -447,3 +445,12 @@ $ mkvirtualenv business-rules
 $ pip install -r dev-requirements.txt
 $ nosetests
 ```
+
+## Deploying
+
+Run the following:
+```bash
+$ python setup.py sdist bdist_wheel
+```
+
+This will make a `business-rules-simon-{version}.tar.gz` file in `dist`. You can use that file to upload this package to your local repository.
