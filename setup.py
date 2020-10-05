@@ -13,7 +13,7 @@ description = 'Python DSL for setting up business intelligence rules that can be
 
 install_requires = [
     'pytz>=2016.10',
-    'typing',
+    "typing ; python_version<'3.5'",
     'six',
 ]
 
